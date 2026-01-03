@@ -223,6 +223,77 @@
   .weather-icon-animated:hover {
     transform: scale(1.1) rotate(5deg);
   }
+
+  /* App Dock */
+  .app-dock {
+    @apply w-full max-w-2xl mt-8 relative;
+  }
+
+  .app-dock-grid {
+    @apply flex flex-wrap justify-center gap-4;
+  }
+
+  .app-button {
+    @apply flex flex-col items-center gap-2 p-3 rounded-2xl transition-all duration-300;
+    background: hsl(var(--card) / 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid hsl(0 0% 100% / 0.3);
+    min-width: 80px;
+    animation: fadeInUp 0.5s ease-out both;
+  }
+
+  .app-button:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: var(--shadow-hover);
+    background: hsl(var(--card) / 0.9);
+  }
+
+  .app-button:active {
+    transform: translateY(-2px) scale(1.02);
+  }
+
+  .app-icon {
+    @apply w-12 h-12 rounded-xl;
+    box-shadow: 0 2px 8px hsl(0 0% 0% / 0.1);
+  }
+
+  .app-name {
+    @apply text-xs text-foreground font-medium text-center;
+    max-width: 70px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .settings-btn {
+    @apply absolute -top-2 right-0;
+  }
+
+  .settings-dialog {
+    @apply max-h-[80vh];
+  }
+
+  .settings-list {
+    @apply space-y-2 max-h-[60vh] overflow-y-auto pr-2;
+  }
+
+  .settings-item {
+    @apply flex items-center justify-between p-2 rounded-lg hover:bg-secondary/50 transition-colors;
+  }
+
+  /* City Selector Modal */
+  .city-modal {
+    @apply max-w-md;
+  }
+
+  .city-list-item {
+    @apply flex items-center gap-3 w-full px-3 py-2 rounded-lg text-left text-sm transition-colors;
+    @apply hover:bg-secondary text-foreground;
+  }
+
+  .city-list-item-active {
+    @apply bg-primary/10 text-primary font-medium;
+  }
 }
 
 @layer utilities {

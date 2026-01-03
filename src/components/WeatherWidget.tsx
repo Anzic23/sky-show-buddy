@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Cloud, Sun, CloudRain, CloudSnow, CloudLightning, Wind, Droplets, MapPin, RefreshCw } from 'lucide-react';
+import { Cloud, Sun, CloudRain, CloudSnow, CloudLightning, Wind, Droplets, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { CitySelector } from './CitySelector';
+import { AppDock } from './AppDock';
 
 interface WeatherData {
   city: string;
@@ -37,6 +38,8 @@ const mockWeather: WeatherData = {
   ],
 };
 
+const CITY_STORAGE_KEY = 'weather-city';
+
 const WeatherIcon = ({ icon, className }: { icon: string; className?: string }) => {
   const iconClass = cn("weather-icon-animated", className);
   
@@ -57,10 +60,11 @@ const WeatherIcon = ({ icon, className }: { icon: string; className?: string }) 
 };
 
 export const WeatherWidget = () => {
-  const [weather, setWeather] = useState<WeatherData>(mockWeather);
-  const [cityInput, setCityInput] = useState('');
-  const [isEditing, setIsEditing] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [weather, setWeather] = useState<WeatherData>(() => {
+    const savedCity = localStorage.getItem(CITY_STORAGE_KEY);
+    return savedCity ? { ...mockWeather, city: savedCity } : mockWeather;
+  });
+  const [citySelectorOpen, setCitySelectorOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
@@ -68,17 +72,9 @@ export const WeatherWidget = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const handleCityChange = () => {
-    if (cityInput.trim()) {
-      setIsLoading(true);
-      // Имитация загрузки
-      setTimeout(() => {
-        setWeather(prev => ({ ...prev, city: cityInput.trim() }));
-        setIsEditing(false);
-        setCityInput('');
-        setIsLoading(false);
-      }, 500);
-    }
+  const handleCitySelect = (city: string) => {
+    setWeather(prev => ({ ...prev, city }));
+    localStorage.setItem(CITY_STORAGE_KEY, city);
   };
 
   const formatTime = (date: Date) => {
@@ -107,38 +103,15 @@ export const WeatherWidget = () => {
         <div className="weather-header">
           <div className="weather-city-row">
             <MapPin className="w-4 h-4 text-muted-foreground" />
-            {isEditing ? (
-              <div className="flex items-center gap-2 flex-1">
-                <Input
-                  value={cityInput}
-                  onChange={(e) => setCityInput(e.target.value)}
-                  placeholder="Введите город..."
-                  className="weather-input"
-                  onKeyDown={(e) => e.key === 'Enter' && handleCityChange()}
-                  autoFocus
-                />
-                <Button 
-                  size="sm" 
-                  onClick={handleCityChange}
-                  disabled={isLoading}
-                  className="weather-btn"
-                >
-                  {isLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : 'OK'}
-                </Button>
-              </div>
-            ) : (
-              <>
-                <span className="weather-city-name">{weather.city}</span>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => setIsEditing(true)}
-                  className="weather-change-btn"
-                >
-                  Изменить
-                </Button>
-              </>
-            )}
+            <span className="weather-city-name">{weather.city}</span>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setCitySelectorOpen(true)}
+              className="weather-change-btn"
+            >
+              Изменить
+            </Button>
           </div>
         </div>
 
@@ -183,6 +156,17 @@ export const WeatherWidget = () => {
           ))}
         </div>
       </div>
+
+      {/* Иконки приложений */}
+      <AppDock />
+
+      {/* Выбор города */}
+      <CitySelector 
+        open={citySelectorOpen}
+        onOpenChange={setCitySelectorOpen}
+        onCitySelect={handleCitySelect}
+        currentCity={weather.city}
+      />
     </div>
   );
 };
