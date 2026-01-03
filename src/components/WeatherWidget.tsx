@@ -22,20 +22,37 @@ interface ForecastDay {
   icon: string;
 }
 
-const mockWeather: WeatherData = {
-  city: 'Москва',
-  temp: -4,
-  description: 'Облачно',
-  icon: 'cloudy',
-  humidity: 78,
-  wind: 5.2,
-  forecast: [
-    { day: 'Пт', tempMax: -3, tempMin: -9, icon: 'snow' },
-    { day: 'Сб', tempMax: -3, tempMin: -6, icon: 'cloudy' },
-    { day: 'Вс', tempMax: -4, tempMin: -7, icon: 'cloudy' },
-    { day: 'Пн', tempMax: -6, tempMin: -8, icon: 'snow' },
-    { day: 'Вт', tempMax: -8, tempMin: -10, icon: 'sunny' },
-  ],
+// Генерация погоды на основе названия города (детерминированная)
+const generateWeatherForCity = (city: string): WeatherData => {
+  // Используем хеш города для генерации "случайных" но стабильных значений
+  const hash = city.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  
+  const icons = ['sunny', 'cloudy', 'rain', 'snow', 'cloudy'];
+  const descriptions = ['Ясно', 'Облачно', 'Дождь', 'Снег', 'Переменная облачность'];
+  const weatherIndex = hash % icons.length;
+  
+  // Температура зависит от "широты" города (имитация)
+  const baseTemp = ((hash % 40) - 20); // от -20 до +20
+  const humidity = 40 + (hash % 50); // от 40 до 90
+  const wind = 1 + (hash % 15); // от 1 до 15 м/с
+  
+  const days = ['Пт', 'Сб', 'Вс', 'Пн', 'Вт'];
+  const forecast = days.map((day, i) => ({
+    day,
+    tempMax: baseTemp + 3 - i + ((hash + i) % 5),
+    tempMin: baseTemp - 5 - i + ((hash + i) % 3),
+    icon: icons[(hash + i) % icons.length],
+  }));
+
+  return {
+    city,
+    temp: baseTemp,
+    description: descriptions[weatherIndex],
+    icon: icons[weatherIndex],
+    humidity,
+    wind: parseFloat(wind.toFixed(1)),
+    forecast,
+  };
 };
 
 const CITY_STORAGE_KEY = 'weather-city';
@@ -61,8 +78,8 @@ const WeatherIcon = ({ icon, className }: { icon: string; className?: string }) 
 
 export const WeatherWidget = () => {
   const [weather, setWeather] = useState<WeatherData>(() => {
-    const savedCity = localStorage.getItem(CITY_STORAGE_KEY);
-    return savedCity ? { ...mockWeather, city: savedCity } : mockWeather;
+    const savedCity = localStorage.getItem(CITY_STORAGE_KEY) || 'Москва';
+    return generateWeatherForCity(savedCity);
   });
   const [citySelectorOpen, setCitySelectorOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -73,7 +90,7 @@ export const WeatherWidget = () => {
   }, []);
 
   const handleCitySelect = (city: string) => {
-    setWeather(prev => ({ ...prev, city }));
+    setWeather(generateWeatherForCity(city));
     localStorage.setItem(CITY_STORAGE_KEY, city);
   };
 
