@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Cloud, Sun, CloudRain, CloudSnow, CloudLightning, Wind, Droplets, MapPin } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Cloud, Sun, CloudRain, CloudSnow, CloudLightning, Wind, Droplets, MapPin, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { CitySelector } from './CitySelector';
@@ -22,40 +22,50 @@ interface ForecastDay {
   icon: string;
 }
 
-// Генерация погоды на основе названия города (детерминированная)
-const generateWeatherForCity = (city: string): WeatherData => {
-  // Используем хеш города для генерации "случайных" но стабильных значений
-  const hash = city.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  
-  const icons = ['sunny', 'cloudy', 'rain', 'snow', 'cloudy'];
-  const descriptions = ['Ясно', 'Облачно', 'Дождь', 'Снег', 'Переменная облачность'];
-  const weatherIndex = hash % icons.length;
-  
-  // Температура зависит от "широты" города (имитация)
-  const baseTemp = ((hash % 40) - 20); // от -20 до +20
-  const humidity = 40 + (hash % 50); // от 40 до 90
-  const wind = 1 + (hash % 15); // от 1 до 15 м/с
-  
-  const days = ['Пт', 'Сб', 'Вс', 'Пн', 'Вт'];
-  const forecast = days.map((day, i) => ({
-    day,
-    tempMax: baseTemp + 3 - i + ((hash + i) % 5),
-    tempMin: baseTemp - 5 - i + ((hash + i) % 3),
-    icon: icons[(hash + i) % icons.length],
-  }));
+interface OpenMeteoGeocodingResult {
+  results?: Array<{
+    name: string;
+    country?: string;
+    latitude: number;
+    longitude: number;
+  }>;
+}
 
-  return {
-    city,
-    temp: baseTemp,
-    description: descriptions[weatherIndex],
-    icon: icons[weatherIndex],
-    humidity,
-    wind: parseFloat(wind.toFixed(1)),
-    forecast,
+interface OpenMeteoWeatherResponse {
+  current: {
+    temperature_2m: number;
+    relativehumidity_2m: number;
+    wind_speed_10m: number;
+    weather_code: number;
   };
-};
+  daily: {
+    time: string[];
+    temperature_2m_max: number[];
+    temperature_2m_min: number[];
+    weather_code: number[];
+  };
+}
 
 const CITY_STORAGE_KEY = 'weather-city';
+
+const getWeatherDescription = (code: number) => {
+  if (code === 0) return 'Ясно';
+  if ([1, 2, 3].includes(code)) return 'Облачно';
+  if ([45, 48].includes(code)) return 'Туман';
+  if ([51, 53, 55, 56, 57, 61, 63, 65, 80, 81, 82].includes(code)) return 'Дождь';
+  if ([71, 73, 75, 77, 85, 86].includes(code)) return 'Снег';
+  if ([95, 96, 99].includes(code)) return 'Гроза';
+  return 'Переменная облачность';
+};
+
+const getWeatherIcon = (code: number) => {
+  if (code === 0) return 'sunny';
+  if ([1, 2, 3, 45, 48].includes(code)) return 'cloudy';
+  if ([51, 53, 55, 56, 57, 61, 63, 65, 80, 81, 82].includes(code)) return 'rain';
+  if ([71, 73, 75, 77, 85, 86].includes(code)) return 'snow';
+  if ([95, 96, 99].includes(code)) return 'storm';
+  return 'cloudy';
+};
 
 const WeatherIcon = ({ icon, className }: { icon: string; className?: string }) => {
   const iconClass = cn("weather-icon-animated", className);
@@ -77,21 +87,85 @@ const WeatherIcon = ({ icon, className }: { icon: string; className?: string }) 
 };
 
 export const WeatherWidget = () => {
-  const [weather, setWeather] = useState<WeatherData>(() => {
-    const savedCity = localStorage.getItem(CITY_STORAGE_KEY) || 'Москва';
-    return generateWeatherForCity(savedCity);
-  });
+  const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [city, setCity] = useState(() => localStorage.getItem(CITY_STORAGE_KEY) || 'Москва');
   const [citySelectorOpen, setCitySelectorOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  const handleCitySelect = (city: string) => {
-    setWeather(generateWeatherForCity(city));
-    localStorage.setItem(CITY_STORAGE_KEY, city);
+  const fetchWeather = useCallback(async (cityName: string) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const geoResponse = await fetch(
+        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&language=ru&count=1`
+      );
+
+      if (!geoResponse.ok) {
+        throw new Error('Не удалось получить координаты города');
+      }
+
+      const geoData: OpenMeteoGeocodingResult = await geoResponse.json();
+      const location = geoData.results?.[0];
+
+      if (!location) {
+        throw new Error('Город не найден');
+      }
+
+      const weatherResponse = await fetch(
+        `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}` +
+        `&current=temperature_2m,relativehumidity_2m,wind_speed_10m,weather_code` +
+        `&daily=temperature_2m_max,temperature_2m_min,weather_code&forecast_days=5&timezone=auto&language=ru`
+      );
+
+      if (!weatherResponse.ok) {
+        throw new Error('Не удалось получить данные погоды');
+      }
+
+      const weatherData: OpenMeteoWeatherResponse = await weatherResponse.json();
+      const { current, daily } = weatherData;
+
+      const forecast: ForecastDay[] = daily.time.map((date, index) => {
+        const dayName = new Date(date).toLocaleDateString('ru-RU', { weekday: 'short' });
+        return {
+          day: dayName.charAt(0).toUpperCase() + dayName.slice(1),
+          tempMax: Math.round(daily.temperature_2m_max[index]),
+          tempMin: Math.round(daily.temperature_2m_min[index]),
+          icon: getWeatherIcon(daily.weather_code[index]),
+        };
+      });
+
+      setWeather({
+        city: location.name,
+        temp: Math.round(current.temperature_2m),
+        description: getWeatherDescription(current.weather_code),
+        icon: getWeatherIcon(current.weather_code),
+        humidity: Math.round(current.relativehumidity_2m),
+        wind: Number(current.wind_speed_10m.toFixed(1)),
+        forecast,
+      });
+    } catch (err) {
+      console.error(err);
+      setError(err instanceof Error ? err.message : 'Неизвестная ошибка');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchWeather(city);
+  }, [city, fetchWeather]);
+
+  const handleCitySelect = (newCity: string) => {
+    setCity(newCity);
+    localStorage.setItem(CITY_STORAGE_KEY, newCity);
   };
 
   const formatTime = (date: Date) => {
@@ -106,24 +180,37 @@ export const WeatherWidget = () => {
     });
   };
 
-  return (
-    <div className="weather-container">
-      {/* Время */}
-      <div className="time-display">
-        <span className="time-text">{formatTime(currentTime)}</span>
-        <span className="date-text">{formatDate(currentTime)}</span>
-      </div>
+  const renderContent = () => {
+    if (isLoading && !weather) {
+      return (
+        <div className="weather-card flex items-center justify-center min-h-[320px]">
+          <Loader2 className="w-8 h-8 animate-spin" />
+        </div>
+      );
+    }
 
-      {/* Виджет погоды */}
+    if (error) {
+      return (
+        <div className="weather-card flex flex-col items-center justify-center text-center gap-3 min-h-[320px]">
+          <p className="text-lg font-semibold">Не удалось загрузить погоду</p>
+          <p className="text-sm text-muted-foreground">{error}</p>
+          <Button onClick={() => fetchWeather(city)}>Повторить</Button>
+        </div>
+      );
+    }
+
+    if (!weather) return null;
+
+    return (
       <div className="weather-card">
         {/* Заголовок с городом */}
         <div className="weather-header">
           <div className="weather-city-row">
             <MapPin className="w-4 h-4 text-muted-foreground" />
             <span className="weather-city-name">{weather.city}</span>
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setCitySelectorOpen(true)}
               className="weather-change-btn"
             >
@@ -141,7 +228,7 @@ export const WeatherWidget = () => {
               <span className="weather-desc">{weather.description}</span>
             </div>
           </div>
-          
+
           {/* Детали */}
           <div className="weather-details">
             <div className="weather-detail">
@@ -158,8 +245,8 @@ export const WeatherWidget = () => {
         {/* Прогноз */}
         <div className="weather-forecast">
           {weather.forecast.map((day, index) => (
-            <div 
-              key={day.day} 
+            <div
+              key={`${day.day}-${index}`}
               className="forecast-item"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
@@ -173,16 +260,29 @@ export const WeatherWidget = () => {
           ))}
         </div>
       </div>
+    );
+  };
+
+  return (
+    <div className="weather-container">
+      {/* Время */}
+      <div className="time-display">
+        <span className="time-text">{formatTime(currentTime)}</span>
+        <span className="date-text">{formatDate(currentTime)}</span>
+      </div>
+
+      {/* Виджет погоды */}
+      {renderContent()}
 
       {/* Иконки приложений */}
       <AppDock />
 
       {/* Выбор города */}
-      <CitySelector 
+      <CitySelector
         open={citySelectorOpen}
         onOpenChange={setCitySelectorOpen}
         onCitySelect={handleCitySelect}
-        currentCity={weather.city}
+        currentCity={weather?.city ?? city}
       />
     </div>
   );
