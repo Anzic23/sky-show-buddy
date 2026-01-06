@@ -1,10 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-    <defs>
-      <linearGradient id="grad-poweramp" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#374151" stop-opacity="0.9" />
-        <stop offset="100%" stop-color="#374151" stop-opacity="0.7" />
-      </linearGradient>
-    </defs>
-    <rect rx="12" ry="12" width="64" height="64" fill="url(#grad-poweramp)" />
-    <text x="50%" y="50%" fill="#fff" font-family="'Inter', sans-serif" font-size="18" font-weight="700" text-anchor="middle" dominant-baseline="central">PA</text>
-  </svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Poweramp logo">
+  <rect width="64" height="64" rx="14" fill="#0B0F1A" />
+  <circle cx="32" cy="32" r="18" fill="#111827" stroke="#0EA5E9" stroke-width="3" />
+  <path d="M27 23.5 44 32 27 40.5Z" fill="#0EA5E9" />
+</svg>

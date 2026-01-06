@@ -1,10 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-    <defs>
-      <linearGradient id="grad-wechat" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#7bb32e" stop-opacity="0.9" />
-        <stop offset="100%" stop-color="#7bb32e" stop-opacity="0.7" />
-      </linearGradient>
-    </defs>
-    <rect rx="12" ry="12" width="64" height="64" fill="url(#grad-wechat)" />
-    <text x="50%" y="50%" fill="#fff" font-family="'Inter', sans-serif" font-size="18" font-weight="700" text-anchor="middle" dominant-baseline="central">WC</text>
-  </svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="WeChat logo">
+  <rect width="64" height="64" rx="14" fill="#09B83E" />
+  <path d="M26 18c-7 0-12.5 4.8-12.5 10.7 0 3.6 2.3 6.7 5.7 8.6L17 42l6.6-2.5c.8.1 1.6.2 2.4.2 7 0 12.5-4.8 12.5-10.7C38.5 22.8 33 18 26 18Z" fill="#fff" />
+  <path d="M36.6 27.5c6.3 0 11.4 4.4 11.4 9.8 0 3-1.9 5.7-4.8 7.4l1 5.3-5.7-2.4c-.8.1-1.7.2-2.4.2-6.3 0-11.4-4.4-11.4-9.8 0-5.4 5.1-9.8 11.4-9.8Z" fill="#E8F7EC" />
+  <circle cx="22" cy="25.5" r="1.6" fill="#09B83E" />
+  <circle cx="30" cy="25.5" r="1.6" fill="#09B83E" />
+  <circle cx="34" cy="35" r="1.6" fill="#09B83E" />
+  <circle cx="42" cy="35" r="1.6" fill="#09B83E" />
+</svg>

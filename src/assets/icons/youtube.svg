@@ -1,10 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-    <defs>
-      <linearGradient id="grad-youtube" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#ff0000" stop-opacity="0.9" />
-        <stop offset="100%" stop-color="#ff0000" stop-opacity="0.7" />
-      </linearGradient>
-    </defs>
-    <rect rx="12" ry="12" width="64" height="64" fill="url(#grad-youtube)" />
-    <text x="50%" y="50%" fill="#fff" font-family="'Inter', sans-serif" font-size="18" font-weight="700" text-anchor="middle" dominant-baseline="central">YT</text>
-  </svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="YouTube logo">
+  <rect width="64" height="64" rx="14" fill="#FF0000" />
+  <path d="M18 23c1.5-4 5.8-5 9.3-5.2C33.2 17.5 43 17.5 43 17.5s9.8 0 15.7.3C62.3 18 64 21.7 64 26v12c0 4.3-1.7 8-5.3 8.2C53 46.5 43 46.5 43 46.5s-9.8 0-15.7-.3C23 46 21.5 45 20 41z" fill="#FF0000" />
+  <rect x="12" y="16" width="40" height="32" rx="8" fill="#FF0000" opacity="0.35" />
+  <path d="M28 23.5 42 32 28 40.5Z" fill="#fff" />
+</svg>
