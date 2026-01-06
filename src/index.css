@@ -1,8 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @layer base {
   :root {
@@ -101,12 +101,18 @@
 
 @layer components {
   .weather-container {
-    @apply min-h-screen flex flex-col items-center justify-center p-6;
+    @apply flex flex-col items-center overflow-y-auto;
+    min-height: 100vh;
+    height: 100vh;
+    padding: clamp(16px, 4vh, 48px);
+    gap: clamp(12px, 3vh, 32px);
     background: var(--gradient-sky);
+    background-size: cover;
+    background-position: center;
   }
 
   .time-display {
-    @apply flex flex-col items-center mb-6;
+    @apply flex flex-col items-center;
   }
 
   .time-text {
@@ -120,7 +126,7 @@
   }
 
   .weather-card {
-    @apply w-full max-w-md rounded-3xl p-6 backdrop-blur-xl;
+    @apply w-full max-w-3xl rounded-3xl p-6 backdrop-blur-xl;
     background: var(--gradient-card);
     box-shadow: var(--shadow-card), var(--shadow-inset);
     border: 1px solid hsl(0 0% 100% / 0.5);
@@ -161,7 +167,7 @@
   }
 
   .weather-main {
-    @apply flex items-center gap-6;
+    @apply flex items-center gap-6 flex-wrap;
   }
 
   .weather-temp-block {
@@ -226,15 +232,20 @@
 
   /* App Dock */
   .app-dock {
-    @apply w-full max-w-2xl mt-8 relative;
+    @apply w-full mt-4 relative;
+    max-width: min(1400px, 90vw);
   }
 
   .app-dock-grid {
-    @apply flex flex-wrap justify-center gap-4;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+    gap: clamp(12px, 2vw, 20px);
+    justify-items: center;
   }
 
   .app-button {
-    @apply flex flex-col items-center gap-2 p-3 rounded-2xl transition-all duration-300;
+    @apply flex flex-col items-center gap-2 rounded-2xl transition-all duration-300;
+    padding: clamp(10px, 2vw, 14px);
     background: hsl(var(--card) / 0.7);
     backdrop-filter: blur(10px);
     border: 1px solid hsl(0 0% 100% / 0.3);
@@ -253,7 +264,9 @@
   }
 
   .app-icon {
-    @apply w-12 h-12 rounded-xl;
+    @apply rounded-xl;
+    width: clamp(44px, 5vw, 56px);
+    height: clamp(44px, 5vw, 56px);
     box-shadow: 0 2px 8px hsl(0 0% 0% / 0.1);
   }
 
@@ -293,6 +306,30 @@
 
   .city-list-item-active {
     @apply bg-primary/10 text-primary font-medium;
+  }
+
+  @media (min-width: 1280px) {
+    .app-dock {
+      max-width: 80vw;
+    }
+
+    .weather-card {
+      max-width: 1200px;
+    }
+  }
+
+  @media (max-height: 760px) {
+    .time-text {
+      font-size: clamp(2.5rem, 8vw, 3.75rem);
+    }
+
+    .weather-card {
+      padding: clamp(16px, 3vh, 24px);
+    }
+
+    .app-button {
+      gap: 0.35rem;
+    }
   }
 }
 
