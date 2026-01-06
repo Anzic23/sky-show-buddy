@@ -8,6 +8,8 @@ import appleMusicIcon from '@/assets/app_icons/apple_music.png';
 import spotifyIcon from '@/assets/app_icons/spotify.png';
 import yandexMapsIcon from '@/assets/app_icons/yandex_maps.png';
 import yandexNaviIcon from '@/assets/app_icons/yandex_navi.png';
+import yandexMusicIcon from '@/assets/app_icons/yandex_music.png';
+import yandexRadioIcon from '@/assets/app_icons/yandex_radio.png';
 import googleMapsIcon from '@/assets/app_icons/google_maps.png';
 import twoGisIcon from '@/assets/app_icons/2gis.png';
 import wazeIcon from '@/assets/app_icons/waze.png';
@@ -18,6 +20,7 @@ import aliceIcon from '@/assets/app_icons/alice.png';
 import kinopubIcon from '@/assets/app_icons/kinopub.png';
 import kinopoiskIcon from '@/assets/app_icons/kinopoisk.png';
 import youtubeIcon from '@/assets/app_icons/youtube.png';
+import youtubeMusicIcon from '@/assets/app_icons/youtubeMusic.png';
 import tiktokIcon from '@/assets/app_icons/tiktok.png';
 import okkoIcon from '@/assets/app_icons/okko.png';
 import iviIcon from '@/assets/app_icons/ivi.png';
@@ -33,10 +36,6 @@ import twoChargersIcon from '@/assets/app_icons/2chargers.png';
 import rutubeIcon from '@/assets/app_icons/rutube.png';
 import powerampIcon from '@/assets/app_icons/poweramp.png';
 import lampaIcon from '@/assets/app_icons/lampa.png';
-
-const yandexMusicIcon = yandexMapsIcon;
-const yandexRadioIcon = yandexMapsIcon;
-const youtubeMusicIcon = youtubeIcon;
 
 interface AppItem {
   id: string;
