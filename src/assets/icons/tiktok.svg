@@ -1,10 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-    <defs>
-      <linearGradient id="grad-tiktok" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#121212" stop-opacity="0.9" />
-        <stop offset="100%" stop-color="#121212" stop-opacity="0.7" />
-      </linearGradient>
-    </defs>
-    <rect rx="12" ry="12" width="64" height="64" fill="url(#grad-tiktok)" />
-    <text x="50%" y="50%" fill="#fff" font-family="'Inter', sans-serif" font-size="18" font-weight="700" text-anchor="middle" dominant-baseline="central">TT</text>
-  </svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="TikTok logo">
+  <rect width="64" height="64" rx="14" fill="#0F0F0F" />
+  <path d="M27 22.5c0 7-3.7 11.4-7.6 12.8 0 5.6 4.3 9 9.3 9 5.6 0 9.3-3.9 9.3-10V23c2.1 1.8 4.7 3 7.6 3.2v-6c-2.8-.3-5.4-1.9-7-4.2-1-1.5-1.6-3.3-1.7-5h-6V34c0 2.5-1.4 4.2-3.6 4.2-2.1 0-3.7-1.5-3.7-4.4 3.7-1.4 6.4-5.1 6.4-11.3Z" fill="#25F4EE" />
+  <path d="M27 24.5c0 7-3.7 11.4-7.6 12.8 0 5.6 4.3 9 9.3 9 5.6 0 9.3-3.9 9.3-10V25c2.1 1.8 4.7 3 7.6 3.2v-4.2c-3.4-.2-6.5-1.7-8.7-4.1-1.5-1.6-2.5-3.6-3-5.8h-4.5V33c0 2.5-1.4 4.2-3.6 4.2-2.1 0-3.7-1.5-3.7-4.4 3.7-1.4 6.4-5.1 6.4-11.3Z" fill="#FF004F" opacity="0.8" />
+  <path d="M27 23.5c0 7-3.7 11.4-7.6 12.8 0 5.6 4.3 9 9.3 9 5.6 0 9.3-3.9 9.3-10V24c2.1 1.8 4.7 3 7.6 3.2v-4.2c-3.4-.2-6.5-1.7-8.7-4.1-1.5-1.6-2.5-3.6-3-5.8h-5.6V33c0 2.5-1.4 4.2-3.6 4.2-2.1 0-3.7-1.5-3.7-4.4 3.7-1.4 6.4-5.1 6.4-11.3Z" fill="#fff" />
+</svg>
