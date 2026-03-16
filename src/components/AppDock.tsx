@@ -84,7 +84,7 @@ const baseApps: Array<Omit<AppItem, 'enabled'>> = [
   { id: 'rutube', name: 'RuTube', package: 'rtb.mobile.android', scheme: '', path: '', fallbackUrl: 'https://rutube.ru', icon: rutubeIcon, showOnLaunch: true },
   { id: 'poweramp', name: 'Poweramp', package: 'com.maxmpz.audioplayer', class: 'com.maxmpz.audioplayer.activity.MusicActivity', scheme: 'poweramp', path: '', fallbackUrl: 'https://play.google.com/store/apps/details?id=com.maxmpz.audioplayer', icon: powerampIcon, showOnLaunch: true },
   { id: 'lampa', name: 'Lampa', package: 'top.rootu.lampa', scheme: '', path: '', fallbackUrl: 'http://lampa.mx/', icon: lampaIcon, showOnLaunch: true },
-  { id: 'jellyfin', name: 'Jellyfin', package: 'org.jellyfin.mobile', scheme: '', path: '', fallbackUrl: 'https://play.google.com/store/apps/details?id=org.jellyfin.mobile', icon: jellyfinIcon, showOnLaunch: true },
+  { id: 'jellyfin', name: 'Jellyfin', package: 'org.jellyfin.mobile', class: 'org.jellyfin.mobile.MainActivity', scheme: '', path: '', fallbackUrl: 'https://play.google.com/store/apps/details?id=org.jellyfin.mobile', icon: jellyfinIcon, showOnLaunch: true },
 ];
 
 const defaultApps: AppItem[] = baseApps.map(app => ({
@@ -154,7 +154,8 @@ export const AppDock = () => {
 
     // Запуск по package name через Android Intent URL (для приложений без URI-схемы)
     if (app.package) {
-      const intentUrl = `intent://#Intent;package=${app.package};end`;
+      const component = app.class ? `;component=${app.package}/${app.class}` : '';
+      const intentUrl = `intent://#Intent;package=${app.package}${component};end`;
       window.location.href = intentUrl;
       return;
     }
