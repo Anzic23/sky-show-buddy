@@ -152,10 +152,9 @@ export const AppDock = () => {
       return;
     }
 
-    // Запуск по package name через Android Intent URL (для приложений без URI-схемы)
+  // Запуск по package name через Android Intent URL (для приложений без URI-схемы)
     if (app.package) {
-      const component = app.class ? `;component=${app.package}/${app.class}` : '';
-      const intentUrl = `intent://#Intent;package=${app.package}${component};end`;
+      const intentUrl = `intent://#Intent;package=${app.package};action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;end`;
       window.location.href = intentUrl;
       return;
     }
