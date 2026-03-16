@@ -156,9 +156,6 @@ export const AppDock = () => {
     if (app.package) {
       const intentUrl = `intent://#Intent;package=${app.package};end`;
       window.location.href = intentUrl;
-      if (app.fallbackUrl) {
-        setTimeout(() => window.open(app.fallbackUrl, '_blank'), 700);
-      }
       return;
     }
 
