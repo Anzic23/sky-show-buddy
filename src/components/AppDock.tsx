@@ -36,6 +36,7 @@ import twoChargersIcon from '@/assets/app_icons/2chargers.png';
 import rutubeIcon from '@/assets/app_icons/rutube.png';
 import powerampIcon from '@/assets/app_icons/poweramp.png';
 import lampaIcon from '@/assets/app_icons/lampa.png';
+import jellyfinIcon from '@/assets/app_icons/jellyfin.png';
 
 interface AppItem {
   id: string;
@@ -83,6 +84,7 @@ const baseApps: Array<Omit<AppItem, 'enabled'>> = [
   { id: 'rutube', name: 'RuTube', package: 'rtb.mobile.android', scheme: '', path: '', fallbackUrl: 'https://rutube.ru', icon: rutubeIcon, showOnLaunch: true },
   { id: 'poweramp', name: 'Poweramp', package: 'com.maxmpz.audioplayer', class: 'com.maxmpz.audioplayer.activity.MusicActivity', scheme: 'poweramp', path: '', fallbackUrl: 'https://play.google.com/store/apps/details?id=com.maxmpz.audioplayer', icon: powerampIcon, showOnLaunch: true },
   { id: 'lampa', name: 'Lampa', package: 'top.rootu.lampa', scheme: '', path: '', fallbackUrl: 'http://lampa.mx/', icon: lampaIcon, showOnLaunch: true },
+  { id: 'Jellyfin', name: 'Jellyfin', package: 'org.jellyfin.mobile', scheme: '', path: '', fallbackUrl: 'https://play.google.com/store/apps/details?id=org.jellyfin.mobile', icon: jellyfinIcon, showOnLaunch: true },
 ];
 
 const defaultApps: AppItem[] = baseApps.map(app => ({
