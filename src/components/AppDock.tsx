@@ -83,7 +83,7 @@ const baseApps: Array<Omit<AppItem, 'enabled'>> = [
   { id: '2chargers', name: '2chargers', package: 'to.chargers', scheme: '', path: '', fallbackUrl: 'https://2chargers.net/', icon: twoChargersIcon, showOnLaunch: true },
   { id: 'rutube', name: 'RuTube', package: 'rtb.mobile.android', scheme: '', path: '', fallbackUrl: 'https://rutube.ru', icon: rutubeIcon, showOnLaunch: true },
   { id: 'poweramp', name: 'Poweramp', package: 'com.maxmpz.audioplayer', class: 'com.maxmpz.audioplayer.activity.MusicActivity', scheme: 'poweramp', path: '', fallbackUrl: 'https://play.google.com/store/apps/details?id=com.maxmpz.audioplayer', icon: powerampIcon, showOnLaunch: true },
-  { id: 'lampa', name: 'Lampa', package: 'top.rootu.lampa', scheme: '', path: '', fallbackUrl: 'http://lampa.mx/', icon: lampaIcon, showOnLaunch: true },
+  { id: 'lampa', name: 'Lampa', package: 'top.rootu.lampa', scheme: 'lampa', path: '', fallbackUrl: 'http://lampa.mx/', icon: lampaIcon, showOnLaunch: true },
   { id: 'jellyfin', name: 'Jellyfin', package: 'org.jellyfin.mobile', scheme: 'jellyfin', path: '', fallbackUrl: 'https://play.google.com/store/apps/details?id=org.jellyfin.mobile', icon: jellyfinIcon, showOnLaunch: true },
 ];
 
