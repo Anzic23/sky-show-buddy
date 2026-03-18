@@ -350,7 +350,11 @@
         margin: 0;
       }
       .weather-compact-row .weather-forecast {
-        display: none;
+        margin-top: 8px;
+      }
+
+      .weather-compact-row .forecast-item {
+        padding: 6px 4px;
       }
       .weather-compact-row .weather-current {
         border-bottom: none;
