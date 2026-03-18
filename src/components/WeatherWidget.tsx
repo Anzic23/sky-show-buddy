@@ -265,14 +265,14 @@ export const WeatherWidget = () => {
 
   return (
     <div className="weather-container">
-      {/* Время */}
-      <div className="time-display">
-        <span className="time-text">{formatTime(currentTime)}</span>
-        <span className="date-text">{formatDate(currentTime)}</span>
+      {/* Время + погода в одну строку на широких экранах */}
+      <div className="weather-compact-row">
+        <div className="time-display">
+          <span className="time-text">{formatTime(currentTime)}</span>
+          <span className="date-text">{formatDate(currentTime)}</span>
+        </div>
+        {renderContent()}
       </div>
-
-      {/* Виджет погоды */}
-      {renderContent()}
 
       {/* Иконки приложений */}
       <AppDock />
