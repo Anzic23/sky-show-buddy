@@ -309,28 +309,57 @@
   }
 
   @media (min-width: 1280px) {
-    .app-dock {
-      max-width: 80vw;
+      .app-dock {
+        max-width: 80vw;
+      }
+      .weather-card {
+        max-width: 1200px;
+      }
     }
 
-    .weather-card {
-      max-width: 1200px;
-    }
-  }
-
-  @media (max-height: 760px) {
-    .time-text {
-      font-size: clamp(2.5rem, 8vw, 3.75rem);
-    }
-
-    .weather-card {
-      padding: clamp(16px, 3vh, 24px);
+    @media (max-height: 760px) {
+      .time-text {
+        font-size: clamp(2.5rem, 8vw, 3.75rem);
+      }
+      .weather-card {
+        padding: clamp(16px, 3vh, 24px);
+      }
+      .app-button {
+        gap: 0.35rem;
+      }
     }
 
-    .app-button {
-      gap: 0.35rem;
+    /* Компактный горизонтальный вид на больших экранах */
+    @media (min-width: 900px) {
+      .weather-compact-row {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: clamp(16px, 3vw, 40px);
+        width: 100%;
+        max-width: min(1400px, 90vw);
+      }
+      .weather-compact-row .time-display {
+        flex-shrink: 0;
+      }
+      .weather-compact-row .time-text {
+        font-size: clamp(2.5rem, 5vw, 4.5rem);
+      }
+      .weather-compact-row .weather-card {
+        flex: 1;
+        margin: 0;
+      }
+      .weather-compact-row .weather-forecast {
+        display: none;
+      }
+      .weather-compact-row .weather-current {
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+      .weather-compact-row .weather-temp {
+        font-size: clamp(2rem, 4vw, 3.5rem);
+      }
     }
-  }
 }
 
 @layer utilities {
