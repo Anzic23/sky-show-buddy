@@ -140,19 +140,12 @@ export const AppDock = () => {
       return newApps;
     });
   };
-
+  
   const handleAppClick = (app: AppItem) => {
     const schemeUrl = app.scheme ? `${app.scheme}:${app.path ? `//${app.path}` : '//'}` : undefined;
 
     if (schemeUrl) {
       window.location.href = schemeUrl;
-      return;
-    }
-    
-  // Запуск по package name через Android Intent URL (для приложений без URI-схемы)
-    if (app.package) {
-      const intentUrl = `intent://#Intent;package=${app.package};action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;end`;
-      window.location.href = intentUrl;
       return;
     }
 
