@@ -104,9 +104,10 @@
     @apply flex flex-col items-center overflow-y-auto;
     min-height: 100vh;
     height: 100vh;
-    /* Уменьшены отступы — экономим место на маленьком экране планшета */
+    /* Растягиваем контент равномерно по высоте */
+    justify-content: space-between;
     padding: clamp(8px, 1.5vh, 16px);
-    gap: clamp(6px, 1vh, 12px);
+    gap: 0;
     background: var(--gradient-sky);
     background-size: cover;
     background-position: center;
@@ -235,16 +236,20 @@
 
   /* App Dock */
   .app-dock {
-    @apply w-full mt-4 relative;
+    @apply w-full relative;
     max-width: min(1400px, 90vw);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: clamp(8px, 1.5vh, 20px) 0;
   }
 
   .app-dock-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(90px, 90px));
-    gap: clamp(12px, 2vw, 20px);
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(10px, 2vw, 16px);
     justify-content: center;
-    justify-items: center;
   }
 
   .app-button {
