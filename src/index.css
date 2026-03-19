@@ -241,8 +241,9 @@
 
   .app-dock-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(90px, 90px));
     gap: clamp(12px, 2vw, 20px);
+    justify-content: center;
     justify-items: center;
   }
 
@@ -334,10 +335,9 @@
 
   /*
    * Компактный горизонтальный вид
-   * Breakpoint 500px — срабатывает для горизонтального режима планшета (~650 CSS px)
-   * В вертикальном режиме (~450 CSS px) остаётся вертикальный вид
+   * Срабатывает только в landscape-режиме планшета
    */
-  @media (min-width: 500px) {
+  @media (orientation: landscape) {
     .weather-compact-row {
       display: flex;
       flex-direction: row;
