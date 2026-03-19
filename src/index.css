@@ -330,7 +330,7 @@
     }
 
     /* Компактный горизонтальный вид на больших экранах */
-    @media (min-width: 900px) {
+    @media (min-width: 600px) {
       .weather-compact-row {
         display: flex;
         flex-direction: row;
