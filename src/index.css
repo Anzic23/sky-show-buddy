@@ -104,8 +104,9 @@
     @apply flex flex-col items-center overflow-y-auto;
     min-height: 100vh;
     height: 100vh;
-    padding: clamp(16px, 4vh, 48px);
-    gap: clamp(12px, 3vh, 32px);
+    /* Уменьшены отступы — экономим место на маленьком экране планшета */
+    padding: clamp(8px, 1.5vh, 16px);
+    gap: clamp(6px, 1vh, 12px);
     background: var(--gradient-sky);
     background-size: cover;
     background-position: center;
@@ -126,7 +127,9 @@
   }
 
   .weather-card {
-    @apply w-full max-w-3xl rounded-3xl p-6 backdrop-blur-xl;
+    @apply w-full max-w-3xl rounded-3xl backdrop-blur-xl;
+    /* Уменьшен padding карточки */
+    padding: clamp(10px, 2vw, 16px);
     background: var(--gradient-card);
     box-shadow: var(--shadow-card), var(--shadow-inset);
     border: 1px solid hsl(0 0% 100% / 0.5);
@@ -309,61 +312,92 @@
   }
 
   @media (min-width: 1280px) {
-      .app-dock {
-        max-width: 80vw;
-      }
-      .weather-card {
-        max-width: 1200px;
-      }
+    .app-dock {
+      max-width: 80vw;
+    }
+    .weather-card {
+      max-width: 1200px;
+    }
+  }
+
+  @media (max-height: 760px) {
+    .time-text {
+      font-size: clamp(2.5rem, 8vw, 3.75rem);
+    }
+    .weather-card {
+      padding: clamp(10px, 2vw, 16px);
+    }
+    .app-button {
+      gap: 0.35rem;
+    }
+  }
+
+  /*
+   * Компактный горизонтальный вид
+   * Breakpoint 500px — срабатывает для горизонтального режима планшета (~650 CSS px)
+   * В вертикальном режиме (~450 CSS px) остаётся вертикальный вид
+   */
+  @media (min-width: 500px) {
+    .weather-compact-row {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: clamp(12px, 2vw, 24px);
+      width: 100%;
+      max-width: min(1400px, 90vw);
     }
 
-    @media (max-height: 760px) {
-      .time-text {
-        font-size: clamp(2.5rem, 8vw, 3.75rem);
-      }
-      .weather-card {
-        padding: clamp(16px, 3vh, 24px);
-      }
-      .app-button {
-        gap: 0.35rem;
-      }
+    .weather-compact-row .time-display {
+      flex-shrink: 0;
     }
 
-    /* Компактный горизонтальный вид на больших экранах */
-    @media (min-width: 600px) {
-      .weather-compact-row {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: clamp(16px, 3vw, 40px);
-        width: 100%;
-        max-width: min(1400px, 90vw);
-      }
-      .weather-compact-row .time-display {
-        flex-shrink: 0;
-      }
-      .weather-compact-row .time-text {
-        font-size: clamp(2.5rem, 5vw, 4.5rem);
-      }
-      .weather-compact-row .weather-card {
-        flex: 1;
-        margin: 0;
-      }
-      .weather-compact-row .weather-forecast {
-        margin-top: 8px;
-      }
-
-      .weather-compact-row .forecast-item {
-        padding: 6px 4px;
-      }
-      .weather-compact-row .weather-current {
-        border-bottom: none;
-        padding-bottom: 0;
-      }
-      .weather-compact-row .weather-temp {
-        font-size: clamp(2rem, 4vw, 3.5rem);
-      }
+    /* Уменьшенный размер времени в горизонтальном режиме */
+    .weather-compact-row .time-text {
+      font-size: clamp(1.8rem, 6vw, 2.8rem);
     }
+
+    .weather-compact-row .date-text {
+      font-size: 0.8rem;
+    }
+
+    .weather-compact-row .weather-card {
+      flex: 1;
+      margin: 0;
+    }
+
+    /* Прогноз компактнее */
+    .weather-compact-row .weather-forecast {
+      margin-top: 6px;
+    }
+
+    .weather-compact-row .forecast-item {
+      padding: 4px 2px;
+    }
+
+    .weather-compact-row .weather-current {
+      border-bottom: none;
+      padding-bottom: 0;
+      padding-top: 8px;
+    }
+
+    /* Уменьшенная температура */
+    .weather-compact-row .weather-temp {
+      font-size: clamp(1.8rem, 4vw, 3rem);
+    }
+
+    .weather-compact-row .weather-desc {
+      font-size: 0.9rem;
+    }
+
+    .weather-compact-row .weather-details {
+      margin-top: 4px;
+      gap: 12px;
+    }
+
+    .weather-compact-row .weather-header {
+      margin-bottom: 4px;
+    }
+  }
 }
 
 @layer utilities {
