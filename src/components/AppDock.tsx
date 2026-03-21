@@ -37,6 +37,7 @@ import rutubeIcon from '@/assets/app_icons/rutube.png';
 import powerampIcon from '@/assets/app_icons/poweramp.png';
 import lampaIcon from '@/assets/app_icons/lampa.png';
 import jellyfinIcon from '@/assets/app_icons/jellyfin.png';
+import strelkaIcon from '@/assets/app_icons/strelka.png';
 
 interface AppItem {
   id: string;
@@ -85,6 +86,7 @@ const baseApps: Array<Omit<AppItem, 'enabled'>> = [
   { id: 'poweramp', name: 'Poweramp', package: 'com.maxmpz.audioplayer', class: 'com.maxmpz.audioplayer.activity.MusicActivity', scheme: 'poweramp', path: '', fallbackUrl: 'https://play.google.com/store/apps/details?id=com.maxmpz.audioplayer', icon: powerampIcon, showOnLaunch: true },
   { id: 'lampa', name: 'Lampa', package: 'top.rootu.lampa', scheme: 'lampa', path: 'top.rootu.lampa', fallbackUrl: 'http://lampa.mx/', icon: lampaIcon, showOnLaunch: true },
   { id: 'jellyfin', name: 'Jellyfin', package: 'org.jellyfin.mobile', scheme: 'jellyfin', path: '', fallbackUrl: 'https://play.google.com/store/apps/details?id=org.jellyfin.mobile', icon: jellyfinIcon, showOnLaunch: true },
+  { id: 'strelka', name: 'Стрелка', package: 'com.ivolk.StrelkaGPS', scheme: 'strelka', path: '', fallbackUrl: 'https://ivolk.ru/astrelka.htm', icon: strelkaIcon, showOnLaunch: true },
 ];
 
 const defaultApps: AppItem[] = baseApps.map(app => ({
