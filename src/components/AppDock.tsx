@@ -86,7 +86,7 @@ const baseApps: Array<Omit<AppItem, 'enabled'>> = [
   { id: 'poweramp', name: 'Poweramp', package: 'com.maxmpz.audioplayer', class: 'com.maxmpz.audioplayer.activity.MusicActivity', scheme: 'poweramp', path: '', fallbackUrl: 'https://play.google.com/store/apps/details?id=com.maxmpz.audioplayer', icon: powerampIcon, showOnLaunch: true },
   { id: 'lampa', name: 'Lampa', package: 'top.rootu.lampa', scheme: 'lampa', path: 'top.rootu.lampa', fallbackUrl: 'http://lampa.mx/', icon: lampaIcon, showOnLaunch: true },
   { id: 'jellyfin', name: 'Jellyfin', package: 'org.jellyfin.mobile', scheme: 'jellyfin', path: '', fallbackUrl: 'https://play.google.com/store/apps/details?id=org.jellyfin.mobile', icon: jellyfinIcon, showOnLaunch: true },
-  { id: 'strelka', name: 'Стрелка', package: 'com.ivolk.StrelkaGPS', scheme: 'strelka', path: '', fallbackUrl: 'https://ivolk.ru/astrelka.htm', icon: strelkaIcon, showOnLaunch: true },
+//  { id: 'strelka', name: 'Стрелка', package: 'com.ivolk.StrelkaGPS', scheme: 'strelka', path: '', fallbackUrl: 'https://ivolk.ru/astrelka.htm', icon: strelkaIcon, showOnLaunch: true },
 ];
 
 const defaultApps: AppItem[] = baseApps.map(app => ({
