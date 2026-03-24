@@ -68,7 +68,7 @@ const baseApps: Array<Omit<AppItem, 'enabled'>> = [
   { id: 'deepseek', name: 'DeepSeek', package: 'com.deepseek.chat', scheme: 'deepseek', path: '', fallbackUrl: 'https://deepseek.com', icon: deepseekIcon, showOnLaunch: true },
   { id: 'alice', name: 'Alice', package: 'com.yandex.aliceapp', scheme: 'yandexalice', path: '', fallbackUrl: 'https://alice.yandex.ru', icon: aliceIcon, showOnLaunch: true },
   { id: 'kinopub', name: 'Kinopub', package: 'com.kinopub', scheme: 'kinopub', path: '', fallbackUrl: 'https://kino.pub', icon: kinopubIcon, showOnLaunch: true },
-  { id: 'kinopoisk', name: 'Kinopoisk', package: 'ru.kinopoisk', scheme: 'kinopoisk', path: '', fallbackUrl: 'https://hd.kinopoisk.ru', icon: kinopoiskIcon, showOnLaunch: true },
+  { id: 'kinopoisk', name: 'Kinopoisk', package: 'ru.kinopoisk', scheme: 'kp', path: 'mainView', fallbackUrl: 'https://hd.kinopoisk.ru', icon: kinopoiskIcon, showOnLaunch: true },  
   { id: 'youtube', name: 'YouTube', package: 'com.google.android.youtube', scheme: 'vnd.youtube', path: '', fallbackUrl: 'https://m.youtube.com', icon: youtubeIcon, showOnLaunch: true },
   { id: 'tiktok', name: 'TikTok', package: 'com.zhiliaoapp.musically', scheme: 'tiktok', path: '', fallbackUrl: 'https://tiktok.com', icon: tiktokIcon, showOnLaunch: true },
   { id: 'okko', name: 'Okko', package: 'ru.more.play', scheme: 'okko', path: '', fallbackUrl: 'https://okko.tv', icon: okkoIcon, showOnLaunch: true },
