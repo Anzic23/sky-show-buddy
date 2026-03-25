@@ -56,7 +56,7 @@ const baseApps: Array<Omit<AppItem, 'enabled'>> = [
   { id: 'apple-music', name: 'Apple Music', package: 'com.apple.android.music', scheme: 'music', path: '', fallbackUrl: 'https://music.apple.com', icon: appleMusicIcon, showOnLaunch: true },
   { id: 'spotify', name: 'Spotify', package: 'com.spotify.music', scheme: 'spotify', path: '', fallbackUrl: 'https://open.spotify.com', icon: spotifyIcon, showOnLaunch: true },
   { id: 'yandex-music', name: 'Yandex Music', package: 'ru.yandex.music', scheme: 'yandexmusic', path: '', fallbackUrl: 'https://music.yandex.ru', icon: yandexMusicIcon, showOnLaunch: true },
-  { id: 'yandex-radio', name: 'Yandex Radio', package: 'ru.yandex.radio', scheme: 'yandexradio', path: '', fallbackUrl: 'https://radio.yandex.ru', icon: yandexRadioIcon, showOnLaunch: true },
+  { id: 'yandex-radio', name: 'Яндекс Радио', package: 'ru.yandex.mobile.fmradio', scheme: 'yandexradioapp', path: '', fallbackUrl: 'https://radio.yandex.ru', icon: yandexRadioIcon, showOnLaunch: true },
   { id: 'youtube-music', name: 'YouTube Music', package: 'com.google.android.apps.youtube.music', scheme: 'youtubemusic', path: '', fallbackUrl: 'https://music.youtube.com', icon: youtubeMusicIcon, showOnLaunch: true },
   { id: 'yandex-navi', name: 'Yandex Navi', package: 'ru.yandex.yandexnavi', scheme: 'yandexnavi', path: '', fallbackUrl: 'https://maps.yandex.ru', icon: yandexNaviIcon, showOnLaunch: true },
   { id: 'yandex-maps', name: 'Yandex Maps', package: 'ru.yandex.yandexmaps', scheme: 'yandexmaps', path: '', fallbackUrl: 'https://maps.yandex.ru', icon: yandexMapsIcon, showOnLaunch: true },
