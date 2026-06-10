@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'ru.huako.startmenu',
+  appId: 'com.autonavi.minimap',
   appName: 'Start Menu',
   webDir: 'dist'
 };

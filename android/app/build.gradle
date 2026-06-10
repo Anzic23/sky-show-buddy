@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace = "ru.huako.startmenu"
+    namespace = "com.autonavi.minimap"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "ru.huako.startmenu"
+        applicationId "com.autonavi.minimap"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

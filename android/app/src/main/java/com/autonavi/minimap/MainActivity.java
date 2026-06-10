@@ -1,4 +1,4 @@
-package ru.huako.startmenu;
+package com.autonavi.minimap;
 
 import android.os.Bundle;
 

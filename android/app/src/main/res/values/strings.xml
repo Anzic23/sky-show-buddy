@@ -2,6 +2,6 @@
 <resources>
     <string name="app_name">Start Menu</string>
     <string name="title_activity_main">Start Menu</string>
-    <string name="package_name">ru.huako.startmenu</string>
-    <string name="custom_url_scheme">ru.huako.startmenu</string>
+    <string name="package_name">com.autonavi.minimap</string>
+    <string name="custom_url_scheme">com.autonavi.minimap</string>
 </resources>
