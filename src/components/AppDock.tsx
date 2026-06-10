@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import AppScanner, { isNative } from '@/lib/appScanner';
 
 import appleMusicIcon from '@/assets/app_icons/apple_music.png';
 import spotifyIcon from '@/assets/app_icons/spotify.png';
@@ -120,10 +121,20 @@ const buildInitialApps = (): AppItem[] => {
 export const AppDock = () => {
   const [apps, setApps] = useState<AppItem[]>(buildInitialApps);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  // null = not yet known / web build (show everything); Set = filter to installed packages.
+  const [installed, setInstalled] = useState<Set<string> | null>(null);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(apps));
   }, [apps]);
+
+  useEffect(() => {
+    if (!isNative) return;
+    const packages = baseApps.map(app => app.package).filter((p): p is string => !!p);
+    AppScanner.getInstalled({ packages })
+      .then(({ installed }) => setInstalled(new Set(installed)))
+      .catch(err => console.error('getInstalled failed', err));
+  }, []);
 
   const toggleApp = (id: string) => {
     setApps(prev => prev.map(app => (app.id === id ? { ...app, enabled: !app.enabled } : app)));
@@ -143,20 +154,44 @@ export const AppDock = () => {
     });
   };
   
-  const handleAppClick = (app: AppItem) => {
-    const schemeUrl = app.scheme ? `${app.scheme}:${app.path ? `//${app.path}` : '//'}` : undefined;
+  const openFallback = (app: AppItem) => {
+    if (app.fallbackUrl) window.open(app.fallbackUrl, '_blank');
+  };
 
+  const handleAppClick = async (app: AppItem) => {
+    if (isNative) {
+      // Try the BROWSABLE deep link, then a plain package launch, then the web fallback.
+      try {
+        if (app.scheme) {
+          await AppScanner.openUri({ scheme: app.scheme, path: app.path });
+          return;
+        }
+      } catch {
+        /* deep link not handled — fall through */
+      }
+      try {
+        if (app.package) {
+          await AppScanner.launchPackage({ package: app.package });
+          return;
+        }
+      } catch {
+        /* not installed / no launcher — fall through */
+      }
+      openFallback(app);
+      return;
+    }
+
+    const schemeUrl = app.scheme ? `${app.scheme}:${app.path ? `//${app.path}` : '//'}` : undefined;
     if (schemeUrl) {
       window.location.href = schemeUrl;
       return;
     }
-
-    if (app.fallbackUrl) {
-      window.open(app.fallbackUrl, '_blank');
-    }
+    openFallback(app);
   };
 
-  const enabledApps = apps.filter(app => app.enabled);
+  const enabledApps = apps.filter(
+    app => app.enabled && (installed === null || !app.package || installed.has(app.package)),
+  );
 
   return (
     <div className="app-dock">
