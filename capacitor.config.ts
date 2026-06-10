@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.autonavi.minimap',
+  appId: 'com.netease.cloudmusic',
   appName: 'Start Menu',
   webDir: 'dist'
 };

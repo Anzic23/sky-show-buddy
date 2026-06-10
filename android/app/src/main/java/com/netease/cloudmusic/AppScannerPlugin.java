@@ -1,4 +1,4 @@
-package com.autonavi.minimap;
+package com.netease.cloudmusic;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
