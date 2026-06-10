@@ -189,9 +189,11 @@ export const AppDock = () => {
     openFallback(app);
   };
 
-  const enabledApps = apps.filter(
-    app => app.enabled && (installed === null || !app.package || installed.has(app.package)),
-  );
+  const isAvailable = (app: AppItem) =>
+    installed === null || !app.package || installed.has(app.package);
+
+  const enabledApps = apps.filter(app => app.enabled && isAvailable(app));
+  const visibleApps = apps.filter(isAvailable);
 
   return (
     <div className="app-dock">
@@ -220,7 +222,7 @@ export const AppDock = () => {
             <DialogTitle>Настройки приложений</DialogTitle>
           </DialogHeader>
           <div className="settings-list">
-            {apps.map((app, index) => (
+            {visibleApps.map((app, index) => (
               <div key={app.id} className="settings-item">
                 <div className="flex items-center gap-3">
                   <Checkbox
@@ -248,7 +250,7 @@ export const AppDock = () => {
                     size="icon" 
                     className="h-7 w-7"
                     onClick={() => moveApp(app.id, 'down')}
-                    disabled={index === apps.length - 1}
+                    disabled={index === visibleApps.length - 1}
                   >
                     ↓
                   </Button>
