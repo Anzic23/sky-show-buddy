@@ -1,9 +1,9 @@
-import { Settings } from 'lucide-react';
+import { Settings, Plus, Trash2, Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import AppScanner, { isNative } from '@/lib/appScanner';
+import AppScanner, { isNative, type LaunchableApp } from '@/lib/appScanner';
 
 import appleMusicIcon from '@/assets/app_icons/apple_music.png';
 import spotifyIcon from '@/assets/app_icons/spotify.png';
@@ -96,26 +96,39 @@ const defaultApps: AppItem[] = baseApps.map(app => ({
 }));
 
 const STORAGE_KEY = 'app-dock-config';
+const ADDED_KEY = 'app-dock-added';
+
+// Apps the user added from the installed-apps picker (launched by package).
+const ADDED_PREFIX = 'installed:';
+
+const loadAddedApps = (): AppItem[] => {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(ADDED_KEY) ?? '[]') as Array<Omit<AppItem, 'enabled'>>;
+    return parsed.map(app => ({ ...app, enabled: true }));
+  } catch (error) {
+    console.error('Failed to parse added apps', error);
+    return [];
+  }
+};
 
 const buildInitialApps = (): AppItem[] => {
-  const saved = localStorage.getItem(STORAGE_KEY);
+  const base = [...defaultApps, ...loadAddedApps()];
 
-  if (saved) {
-    try {
-      const parsed = JSON.parse(saved) as Array<Partial<AppItem>>;
-      return defaultApps.map(app => {
-        const savedApp = parsed.find(item => item.id === app.id);
-        return {
-          ...app,
-          enabled: savedApp?.enabled ?? app.enabled,
-        };
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null') as Array<Pick<AppItem, 'id' | 'enabled'>> | null;
+    if (saved) {
+      const enabledById = new Map(saved.map(item => [item.id, item.enabled]));
+      const orderById = new Map(saved.map((item, index) => [item.id, index]));
+      base.forEach(app => {
+        if (enabledById.has(app.id)) app.enabled = enabledById.get(app.id)!;
       });
-    } catch (error) {
-      console.error('Failed to parse saved apps', error);
+      base.sort((a, b) => (orderById.get(a.id) ?? Infinity) - (orderById.get(b.id) ?? Infinity));
     }
+  } catch (error) {
+    console.error('Failed to parse saved apps', error);
   }
 
-  return defaultApps;
+  return base;
 };
 
 export const AppDock = () => {
@@ -123,9 +136,13 @@ export const AppDock = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   // null = not yet known / web build (show everything); Set = filter to installed packages.
   const [installed, setInstalled] = useState<Set<string> | null>(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [launchable, setLaunchable] = useState<LaunchableApp[] | null>(null);
+  const [pickerLoading, setPickerLoading] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(apps));
+    // Persist only order + enabled; full data of added apps lives in ADDED_KEY.
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(apps.map(({ id, enabled }) => ({ id, enabled }))));
   }, [apps]);
 
   useEffect(() => {
@@ -146,14 +163,55 @@ export const AppDock = () => {
       if (index === -1) return prev;
       if (direction === 'up' && index === 0) return prev;
       if (direction === 'down' && index === prev.length - 1) return prev;
-      
+
       const newApps = [...prev];
       const swapIndex = direction === 'up' ? index - 1 : index + 1;
       [newApps[index], newApps[swapIndex]] = [newApps[swapIndex], newApps[index]];
       return newApps;
     });
   };
-  
+
+  const persistAdded = (items: AppItem[]) => {
+    const added = items
+      .filter(app => app.id.startsWith(ADDED_PREFIX))
+      .map(app => ({ id: app.id, name: app.name, package: app.package, icon: app.icon }));
+    localStorage.setItem(ADDED_KEY, JSON.stringify(added));
+  };
+
+  const addInstalledApp = (app: LaunchableApp) => {
+    const id = `${ADDED_PREFIX}${app.package}`;
+    setApps(prev => {
+      if (prev.some(a => a.id === id || a.package === app.package)) return prev;
+      const next = [...prev, { id, name: app.label, package: app.package, icon: app.icon, enabled: true }];
+      persistAdded(next);
+      return next;
+    });
+  };
+
+  const removeApp = (id: string) => {
+    setApps(prev => {
+      const next = prev.filter(app => app.id !== id);
+      persistAdded(next);
+      return next;
+    });
+  };
+
+  const openPicker = async () => {
+    setPickerOpen(true);
+    if (launchable) return;
+    setPickerLoading(true);
+    try {
+      const { apps: list } = await AppScanner.getLaunchableApps();
+      list.sort((a, b) => a.label.localeCompare(b.label, 'ru'));
+      setLaunchable(list);
+    } catch (err) {
+      console.error('getLaunchableApps failed', err);
+      setLaunchable([]);
+    } finally {
+      setPickerLoading(false);
+    }
+  };
+
   const openFallback = (app: AppItem) => {
     if (app.fallbackUrl) window.open(app.fallbackUrl, '_blank');
   };
@@ -236,28 +294,83 @@ export const AppDock = () => {
                   </label>
                 </div>
                 <div className="flex gap-1">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     className="h-7 w-7"
                     onClick={() => moveApp(app.id, 'up')}
                     disabled={index === 0}
                   >
                     ↑
                   </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     className="h-7 w-7"
                     onClick={() => moveApp(app.id, 'down')}
                     disabled={index === visibleApps.length - 1}
                   >
                     ↓
                   </Button>
+                  {app.id.startsWith(ADDED_PREFIX) && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-destructive"
+                      onClick={() => removeApp(app.id)}
+                      aria-label="Удалить"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  )}
                 </div>
               </div>
             ))}
           </div>
+          {isNative && (
+            <Button variant="outline" className="w-full mt-2" onClick={openPicker}>
+              <Plus className="w-4 h-4 mr-2" />
+              Добавить приложение
+            </Button>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={pickerOpen} onOpenChange={setPickerOpen}>
+        <DialogContent className="settings-dialog">
+          <DialogHeader>
+            <DialogTitle>Установленные приложения</DialogTitle>
+          </DialogHeader>
+          {pickerLoading && (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin" />
+            </div>
+          )}
+          {!pickerLoading && launchable && (
+            <div className="settings-list">
+              {launchable.map(item => {
+                const added = apps.some(a => a.package === item.package);
+                return (
+                  <button
+                    key={item.package}
+                    className="settings-item w-full text-left disabled:opacity-50"
+                    onClick={() => addInstalledApp(item)}
+                    disabled={added}
+                  >
+                    <div className="flex items-center gap-3">
+                      <img src={item.icon} alt={item.label} className="w-6 h-6 rounded" loading="lazy" />
+                      <span className="text-sm">{item.label}</span>
+                    </div>
+                    {added ? (
+                      <span className="text-xs text-muted-foreground">Добавлено</span>
+                    ) : (
+                      <Plus className="w-4 h-4" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
