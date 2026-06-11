@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { CitySelector } from './CitySelector';
 import { AppDock } from './AppDock';
+import { ThemeToggle } from './ThemeToggle';
 
 interface WeatherData {
   city: string;
@@ -265,6 +266,8 @@ export const WeatherWidget = () => {
 
   return (
     <div className="weather-container">
+      <ThemeToggle />
+
       {/* Время + погода в одну строку на широких экранах */}
       <div className="weather-compact-row">
         <div className="time-display">
