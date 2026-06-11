@@ -50,6 +50,22 @@ const CITY_STORAGE_KEY = 'weather-city';
 const OWM_KEY = import.meta.env.VITE_OWM_KEY as string | undefined;
 const OWM_BASE = 'https://api.openweathermap.org/data/2.5';
 
+// Называет упавший запрос и причину (сеть vs HTTP-статус) — иначе в APK
+// не отличить заблокированный геокодинг от проблемы с ключом OWM.
+const fetchOrThrow = async (label: string, url: string): Promise<Response> => {
+  let res: Response;
+  try {
+    res = await fetch(url);
+  } catch (err) {
+    const detail = err instanceof Error ? err.message : String(err);
+    throw new Error(`${label}: сеть недоступна (${detail})`);
+  }
+  if (!res.ok) {
+    throw new Error(`${label}: HTTP ${res.status}`);
+  }
+  return res;
+};
+
 // OpenWeatherMap condition codes: https://openweathermap.org/weather-conditions
 const getWeatherDescription = (code: number) => {
   if (code === 800) return 'Ясно';
@@ -111,13 +127,10 @@ export const WeatherWidget = () => {
         throw new Error('Не задан ключ OpenWeatherMap');
       }
 
-      const geoResponse = await fetch(
+      const geoResponse = await fetchOrThrow(
+        'Геокодинг',
         `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&language=ru&count=1`
       );
-
-      if (!geoResponse.ok) {
-        throw new Error('Не удалось получить координаты города');
-      }
 
       const geoData: OpenMeteoGeocodingResult = await geoResponse.json();
       const location = geoData.results?.[0];
@@ -128,13 +141,9 @@ export const WeatherWidget = () => {
 
       const coords = `lat=${location.latitude}&lon=${location.longitude}`;
       const [currentRes, forecastRes] = await Promise.all([
-        fetch(`${OWM_BASE}/weather?${coords}&units=metric&lang=ru&appid=${OWM_KEY}`),
-        fetch(`${OWM_BASE}/forecast?${coords}&units=metric&lang=ru&appid=${OWM_KEY}`),
+        fetchOrThrow('Погода', `${OWM_BASE}/weather?${coords}&units=metric&lang=ru&appid=${OWM_KEY}`),
+        fetchOrThrow('Прогноз', `${OWM_BASE}/forecast?${coords}&units=metric&lang=ru&appid=${OWM_KEY}`),
       ]);
-
-      if (!currentRes.ok || !forecastRes.ok) {
-        throw new Error('Не удалось получить данные погоды');
-      }
 
       const current: OwmCurrentResponse = await currentRes.json();
       const forecastData: OwmForecastResponse = await forecastRes.json();
