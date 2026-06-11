@@ -248,6 +248,8 @@ export const AppDock = () => {
   };
 
   const isAvailable = (app: AppItem) =>
+    // Picker-added apps are installed by definition; `installed` only covers curated packages.
+    app.id.startsWith(ADDED_PREFIX) ||
     installed === null || !app.package || installed.has(app.package);
 
   const enabledApps = apps.filter(app => app.enabled && isAvailable(app));
