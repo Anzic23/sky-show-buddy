@@ -23,14 +23,12 @@ interface ForecastDay {
   icon: string;
 }
 
-interface OpenMeteoGeocodingResult {
-  results?: Array<{
-    name: string;
-    country?: string;
-    latitude: number;
-    longitude: number;
-  }>;
-}
+type OwmGeoResult = Array<{
+  name: string;
+  local_names?: { ru?: string };
+  lat: number;
+  lon: number;
+}>;
 
 interface OwmCurrentResponse {
   main: { temp: number; humidity: number };
@@ -127,19 +125,20 @@ export const WeatherWidget = () => {
         throw new Error('Не задан ключ OpenWeatherMap');
       }
 
+      // Геокодинг тоже через OWM: open-meteo (вкл. geocoding-api) с телефона в РФ не ходит.
       const geoResponse = await fetchOrThrow(
         'Геокодинг',
-        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&language=ru&count=1`
+        `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(cityName)}&limit=1&appid=${OWM_KEY}`
       );
 
-      const geoData: OpenMeteoGeocodingResult = await geoResponse.json();
-      const location = geoData.results?.[0];
+      const geoData: OwmGeoResult = await geoResponse.json();
+      const location = geoData[0];
 
       if (!location) {
         throw new Error('Город не найден');
       }
 
-      const coords = `lat=${location.latitude}&lon=${location.longitude}`;
+      const coords = `lat=${location.lat}&lon=${location.lon}`;
       const [currentRes, forecastRes] = await Promise.all([
         fetchOrThrow('Погода', `${OWM_BASE}/weather?${coords}&units=metric&lang=ru&appid=${OWM_KEY}`),
         fetchOrThrow('Прогноз', `${OWM_BASE}/forecast?${coords}&units=metric&lang=ru&appid=${OWM_KEY}`),
@@ -172,7 +171,7 @@ export const WeatherWidget = () => {
         });
 
       setWeather({
-        city: location.name,
+        city: location.local_names?.ru ?? location.name,
         temp: Math.round(current.main.temp),
         description: getWeatherDescription(current.weather[0].id),
         icon: getWeatherIcon(current.weather[0].id),
