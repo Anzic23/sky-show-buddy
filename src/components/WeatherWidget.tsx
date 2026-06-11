@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { CitySelector } from './CitySelector';
 import { AppDock } from './AppDock';
 import { ThemeToggle } from './ThemeToggle';
+import { isNative } from '@/lib/appScanner';
 
 interface WeatherData {
   city: string;
@@ -45,8 +46,10 @@ interface OwmForecastResponse {
 }
 
 const CITY_STORAGE_KEY = 'weather-city';
-const OWM_KEY = import.meta.env.VITE_OWM_KEY as string | undefined;
-const OWM_BASE = 'https://api.openweathermap.org/data/2.5';
+// OWM ходит через прокси на home-server: ключ остаётся на сервере, а прямые
+// коннекты к api.openweathermap.org из WebView в РФ-сетях таймаутятся (DPI).
+const OWM_PROXY = isNative ? 'https://xiaomi.huako.ru/owm' : '/owm';
+const OWM_BASE = `${OWM_PROXY}/data/2.5`;
 
 // Называет упавший запрос и причину (сеть vs HTTP-статус) — иначе в APK
 // не отличить заблокированный геокодинг от проблемы с ключом OWM.
@@ -121,14 +124,10 @@ export const WeatherWidget = () => {
       setIsLoading(true);
       setError(null);
 
-      if (!OWM_KEY) {
-        throw new Error('Не задан ключ OpenWeatherMap');
-      }
-
       // Геокодинг тоже через OWM: open-meteo (вкл. geocoding-api) с телефона в РФ не ходит.
       const geoResponse = await fetchOrThrow(
         'Геокодинг',
-        `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(cityName)}&limit=1&appid=${OWM_KEY}`
+        `${OWM_PROXY}/geo/1.0/direct?q=${encodeURIComponent(cityName)}&limit=1`
       );
 
       const geoData: OwmGeoResult = await geoResponse.json();
@@ -140,8 +139,8 @@ export const WeatherWidget = () => {
 
       const coords = `lat=${location.lat}&lon=${location.lon}`;
       const [currentRes, forecastRes] = await Promise.all([
-        fetchOrThrow('Погода', `${OWM_BASE}/weather?${coords}&units=metric&lang=ru&appid=${OWM_KEY}`),
-        fetchOrThrow('Прогноз', `${OWM_BASE}/forecast?${coords}&units=metric&lang=ru&appid=${OWM_KEY}`),
+        fetchOrThrow('Погода', `${OWM_BASE}/weather?${coords}&units=metric&lang=ru`),
+        fetchOrThrow('Прогноз', `${OWM_BASE}/forecast?${coords}&units=metric&lang=ru`),
       ]);
 
       const current: OwmCurrentResponse = await currentRes.json();
