@@ -31,7 +31,14 @@
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js');
+          // В Capacitor ассеты локальные: SW только отдаёт устаревший кэш
+          // после обновления APK (пустой экран, старый бандл без ключа OWM).
+          if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+            navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister()));
+            if (window.caches) caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+          } else {
+            navigator.serviceWorker.register('/sw.js');
+          }
         });
       }
     </script>

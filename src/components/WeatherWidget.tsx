@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { CitySelector } from './CitySelector';
 import { AppDock } from './AppDock';
 import { ThemeToggle } from './ThemeToggle';
+import { isNative } from '@/lib/appScanner';
 
 interface WeatherData {
   city: string;
@@ -23,48 +24,66 @@ interface ForecastDay {
   icon: string;
 }
 
-interface OpenMeteoGeocodingResult {
-  results?: Array<{
-    name: string;
-    country?: string;
-    latitude: number;
-    longitude: number;
+type OwmGeoResult = Array<{
+  name: string;
+  local_names?: { ru?: string };
+  lat: number;
+  lon: number;
+}>;
+
+interface OwmCurrentResponse {
+  main: { temp: number; humidity: number };
+  wind: { speed: number };
+  weather: Array<{ id: number; description: string }>;
+}
+
+interface OwmForecastResponse {
+  list: Array<{
+    dt_txt: string;
+    main: { temp_max: number; temp_min: number };
+    weather: Array<{ id: number }>;
   }>;
 }
 
-interface OpenMeteoWeatherResponse {
-  current: {
-    temperature_2m: number;
-    relativehumidity_2m: number;
-    wind_speed_10m: number;
-    weather_code: number;
-  };
-  daily: {
-    time: string[];
-    temperature_2m_max: number[];
-    temperature_2m_min: number[];
-    weather_code: number[];
-  };
-}
-
 const CITY_STORAGE_KEY = 'weather-city';
+// OWM ходит через прокси на home-server: ключ остаётся на сервере, а прямые
+// коннекты к api.openweathermap.org из WebView в РФ-сетях таймаутятся (DPI).
+const OWM_PROXY = isNative ? 'https://xiaomi.huako.ru/owm' : '/owm';
+const OWM_BASE = `${OWM_PROXY}/data/2.5`;
 
+// Называет упавший запрос и причину (сеть vs HTTP-статус) — иначе в APK
+// не отличить заблокированный геокодинг от проблемы с ключом OWM.
+const fetchOrThrow = async (label: string, url: string): Promise<Response> => {
+  let res: Response;
+  try {
+    res = await fetch(url);
+  } catch (err) {
+    const detail = err instanceof Error ? err.message : String(err);
+    throw new Error(`${label}: сеть недоступна (${detail})`);
+  }
+  if (!res.ok) {
+    throw new Error(`${label}: HTTP ${res.status}`);
+  }
+  return res;
+};
+
+// OpenWeatherMap condition codes: https://openweathermap.org/weather-conditions
 const getWeatherDescription = (code: number) => {
-  if (code === 0) return 'Ясно';
-  if ([1, 2, 3].includes(code)) return 'Облачно';
-  if ([45, 48].includes(code)) return 'Туман';
-  if ([51, 53, 55, 56, 57, 61, 63, 65, 80, 81, 82].includes(code)) return 'Дождь';
-  if ([71, 73, 75, 77, 85, 86].includes(code)) return 'Снег';
-  if ([95, 96, 99].includes(code)) return 'Гроза';
+  if (code === 800) return 'Ясно';
+  if (code > 800) return 'Облачно';
+  if (code >= 700) return 'Туман';
+  if (code >= 600) return 'Снег';
+  if (code >= 500) return 'Дождь';
+  if (code >= 300) return 'Морось';
+  if (code >= 200) return 'Гроза';
   return 'Переменная облачность';
 };
 
 const getWeatherIcon = (code: number) => {
-  if (code === 0) return 'sunny';
-  if ([1, 2, 3, 45, 48].includes(code)) return 'cloudy';
-  if ([51, 53, 55, 56, 57, 61, 63, 65, 80, 81, 82].includes(code)) return 'rain';
-  if ([71, 73, 75, 77, 85, 86].includes(code)) return 'snow';
-  if ([95, 96, 99].includes(code)) return 'storm';
+  if (code === 800) return 'sunny';
+  if (code >= 200 && code < 300) return 'storm';
+  if (code >= 300 && code < 600) return 'rain';
+  if (code >= 600 && code < 700) return 'snow';
   return 'cloudy';
 };
 
@@ -105,51 +124,58 @@ export const WeatherWidget = () => {
       setIsLoading(true);
       setError(null);
 
-      const geoResponse = await fetch(
-        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&language=ru&count=1`
+      // Геокодинг тоже через OWM: open-meteo (вкл. geocoding-api) с телефона в РФ не ходит.
+      const geoResponse = await fetchOrThrow(
+        'Геокодинг',
+        `${OWM_PROXY}/geo/1.0/direct?q=${encodeURIComponent(cityName)}&limit=1`
       );
 
-      if (!geoResponse.ok) {
-        throw new Error('Не удалось получить координаты города');
-      }
-
-      const geoData: OpenMeteoGeocodingResult = await geoResponse.json();
-      const location = geoData.results?.[0];
+      const geoData: OwmGeoResult = await geoResponse.json();
+      const location = geoData[0];
 
       if (!location) {
         throw new Error('Город не найден');
       }
 
-      const weatherResponse = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}` +
-        `&current=temperature_2m,relativehumidity_2m,wind_speed_10m,weather_code` +
-        `&daily=temperature_2m_max,temperature_2m_min,weather_code&forecast_days=5&timezone=auto&language=ru`
-      );
+      const coords = `lat=${location.lat}&lon=${location.lon}`;
+      const [currentRes, forecastRes] = await Promise.all([
+        fetchOrThrow('Погода', `${OWM_BASE}/weather?${coords}&units=metric&lang=ru`),
+        fetchOrThrow('Прогноз', `${OWM_BASE}/forecast?${coords}&units=metric&lang=ru`),
+      ]);
 
-      if (!weatherResponse.ok) {
-        throw new Error('Не удалось получить данные погоды');
+      const current: OwmCurrentResponse = await currentRes.json();
+      const forecastData: OwmForecastResponse = await forecastRes.json();
+
+      // OWM выдаёт прогноз шагами по 3 часа — агрегируем по календарным дням.
+      const byDay = new Map<string, { max: number; min: number; codes: number[] }>();
+      for (const item of forecastData.list) {
+        const date = item.dt_txt.slice(0, 10);
+        const entry = byDay.get(date) ?? { max: -Infinity, min: Infinity, codes: [] };
+        entry.max = Math.max(entry.max, item.main.temp_max);
+        entry.min = Math.min(entry.min, item.main.temp_min);
+        entry.codes.push(item.weather[0].id);
+        byDay.set(date, entry);
       }
 
-      const weatherData: OpenMeteoWeatherResponse = await weatherResponse.json();
-      const { current, daily } = weatherData;
-
-      const forecast: ForecastDay[] = daily.time.map((date, index) => {
-        const dayName = new Date(date).toLocaleDateString('ru-RU', { weekday: 'short' });
-        return {
-          day: dayName.charAt(0).toUpperCase() + dayName.slice(1),
-          tempMax: Math.round(daily.temperature_2m_max[index]),
-          tempMin: Math.round(daily.temperature_2m_min[index]),
-          icon: getWeatherIcon(daily.weather_code[index]),
-        };
-      });
+      const forecast: ForecastDay[] = Array.from(byDay.entries())
+        .slice(0, 5)
+        .map(([date, value]) => {
+          const dayName = new Date(date).toLocaleDateString('ru-RU', { weekday: 'short' });
+          return {
+            day: dayName.charAt(0).toUpperCase() + dayName.slice(1),
+            tempMax: Math.round(value.max),
+            tempMin: Math.round(value.min),
+            icon: getWeatherIcon(value.codes[Math.floor(value.codes.length / 2)]),
+          };
+        });
 
       setWeather({
-        city: location.name,
-        temp: Math.round(current.temperature_2m),
-        description: getWeatherDescription(current.weather_code),
-        icon: getWeatherIcon(current.weather_code),
-        humidity: Math.round(current.relativehumidity_2m),
-        wind: Number(current.wind_speed_10m.toFixed(1)),
+        city: location.local_names?.ru ?? location.name,
+        temp: Math.round(current.main.temp),
+        description: getWeatherDescription(current.weather[0].id),
+        icon: getWeatherIcon(current.weather[0].id),
+        humidity: Math.round(current.main.humidity),
+        wind: Number(current.wind.speed.toFixed(1)),
         forecast,
       });
     } catch (err) {
